@@ -27,10 +27,13 @@ namespace AlbumArt
         {
 
             InitializeComponent();
+            spotifyConnection = new SpotifyConnection(this);
+
+            spotifyConnection.ConnectToAPI();
+
             currentRects = new Rect[0];
             pictureBox1.Paint += PictureBox1_Paint;
             artRetiever = new ArtRetrieval(this);
-            spotifyConnection = new SpotifyConnection(this);
             currentAlbumList = new AlbumList(this);
 
             if (Properties.Settings.Default.FolderPath != "")
@@ -117,7 +120,6 @@ namespace AlbumArt
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-            spotifyConnection.ConnectToAPI();
         }
         public void PrintString(string value)
         {
@@ -163,7 +165,8 @@ namespace AlbumArt
 
         void DetectText()
         {
-            TesseractEngine tess = new TesseractEngine("C:\\Users\\Malcolm MacDonald\\Documents\\Visual Studio 2015\\Projects\\AlbumArt\\AlbumArt\\bin\\Debug\\tessdata", "eng");
+            string tessPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "tessdata";
+            TesseractEngine tess = new TesseractEngine(tessPath, "eng");
 
             Page newPage = tess.Process(new Bitmap(currentImage), PageSegMode.AutoOsd);
 
@@ -195,9 +198,17 @@ namespace AlbumArt
 
         private void imageSelector_ValueChanged(object sender, EventArgs e)
         {
-            currentImage = Image.FromFile(imageFiles[(int)imageSelector.Value]);
-            pictureBox1.Image = currentImage;
-            DetectText();
+            int index = (int)imageSelector.Value;
+            if(index < 0)
+            {
+                index = 0;
+            }
+            if (imageFiles.Length > index)
+            {
+                currentImage = Image.FromFile(imageFiles[index]);
+                pictureBox1.Image = currentImage;
+                DetectText();
+            }
         }
     }
 }

@@ -32,12 +32,13 @@ namespace AlbumArt
         {
             Paging<SavedAlbum> albums = currentForm.spotifyConnection.GetSavedAlbums();
             WebClient webclient = new WebClient();
+            string imageFolderPath = Properties.Settings.Default.FolderPath +  "\\";
 
             for (int i = 0; i < Math.Min(albums.Limit,albums.Total); i++)
             {
                 string albumName = albums.Items[i].Album.Name;
-
-                webclient.DownloadFile(albums.Items[i].Album.Images[1].Url, "D:\\Malcolm MacDonald\\Pictures\\AlbumArt\\" + albumName + ".bmp");
+                
+                webclient.DownloadFile(albums.Items[i].Album.Images[1].Url, imageFolderPath + albumName + ".bmp");
 
             }
 

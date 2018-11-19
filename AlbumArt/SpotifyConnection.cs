@@ -65,5 +65,16 @@ namespace AlbumArt
         {
           return _spotify.GetSavedAlbums();
         }
+        public async Task<FullArtist> GetArtistFromName(string artistName)
+        {
+            SearchItem foundArtists = await _spotify.SearchItemsAsync(artistName, SearchType.Artist);
+            
+            if (foundArtists != null && foundArtists.Artists.Items.Count > 0)
+            {
+                return foundArtists.Artists.Items[0];
+            }
+
+            return null;
+        }
     }
 }
