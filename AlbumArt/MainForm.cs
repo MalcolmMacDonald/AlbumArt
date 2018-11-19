@@ -165,7 +165,7 @@ namespace AlbumArt
 
         void DetectText()
         {
-            string tessPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "tessdata";
+            string tessPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) +"\\tessdata";
             TesseractEngine tess = new TesseractEngine(tessPath, "eng");
 
             Page newPage = tess.Process(new Bitmap(currentImage), PageSegMode.AutoOsd);
