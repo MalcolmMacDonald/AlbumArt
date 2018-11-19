@@ -15,38 +15,43 @@ namespace AlbumArt
     public partial class MainForm : Form
     {
         ArtRetrieval artRetiever;
+        public SpotifyConnection spotifyConnection;
+        AlbumList currentAlbumList;
         string currentSaveFolder;
         Image currentImage;
         string[] imageFiles;
-        
+
         Rect[] currentRects;
-        
+
         public MainForm()
         {
 
             InitializeComponent();
-           currentRects = new Rect[0];
+            currentRects = new Rect[0];
             pictureBox1.Paint += PictureBox1_Paint;
             artRetiever = new ArtRetrieval(this);
+            spotifyConnection = new SpotifyConnection(this);
+            currentAlbumList = new AlbumList(this);
+
             if (Properties.Settings.Default.FolderPath != "")
             {
                 currentSaveFolder = Properties.Settings.Default.FolderPath;
                 PrintString("Folder found: " + currentSaveFolder);
 
             }
-            
+
         }
 
         private void PictureBox1_Paint(object sender, PaintEventArgs e)
         {
             Pen outlinePen = new Pen(new System.Drawing.SolidBrush(Color.Red));
-            Brush fillBrush = new System.Drawing.SolidBrush(Color.FromArgb(200,255,0,0));
+            Brush fillBrush = new System.Drawing.SolidBrush(Color.FromArgb(200, 255, 0, 0));
 
             for (int i = 0; i < currentRects.Length; i++)
             {
-                if(currentRects[i] != null)
+                if (currentRects[i] != null)
                 {
-                     Rect currentRect = currentRects[i];
+                    Rect currentRect = currentRects[i];
                     //Size sizestep1 = Size.Subtract(new Size(pictureBox1.Image.Size.Width / 2, pictureBox1.Image.Size.Height / 2), pictureBox1.Size);
 
                     // Convert to point.
@@ -58,7 +63,7 @@ namespace AlbumArt
                     int rectWidth = currentRect.X2 - currentRect.X1;
                     int rectHeight = currentRect.Y2 - currentRect.Y1;
 
-                    e.Graphics.DrawRectangle(outlinePen, xPos,yPos, rectWidth, rectHeight);
+                    e.Graphics.DrawRectangle(outlinePen, xPos, yPos, rectWidth, rectHeight);
                     e.Graphics.FillRectangle(fillBrush, xPos, yPos, rectWidth, rectHeight);
                 }
             }
@@ -92,7 +97,7 @@ namespace AlbumArt
 
         private void folderSelectButton_Click(object sender, EventArgs e)
         {
-           if(folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 currentSaveFolder = folderBrowserDialog1.SelectedPath;
                 Properties.Settings.Default.FolderPath = currentSaveFolder;
@@ -112,7 +117,7 @@ namespace AlbumArt
 
         private void connectButton_Click(object sender, EventArgs e)
         {
-            artRetiever.ConnectToAPI();
+            spotifyConnection.ConnectToAPI();
         }
         public void PrintString(string value)
         {
@@ -134,7 +139,7 @@ namespace AlbumArt
             retrieveButton.Hide();
             imageSelector.Visible = true;
             imageSelector.Maximum = imageFiles.Length - 1;
-            
+
             currentImage = Image.FromFile(imageFiles[0]);
             pictureBox1.Image = currentImage;
 
@@ -148,7 +153,7 @@ namespace AlbumArt
         public void HideSpotifyButton()
         {
             connectButton.Hide();
-          
+
         }
         public void ShowRetrieveButton()
         {
@@ -156,12 +161,12 @@ namespace AlbumArt
         }
 
 
-         void DetectText()
+        void DetectText()
         {
             TesseractEngine tess = new TesseractEngine("C:\\Users\\Malcolm MacDonald\\Documents\\Visual Studio 2015\\Projects\\AlbumArt\\AlbumArt\\bin\\Debug\\tessdata", "eng");
-            
-            Page newPage = tess.Process(new Bitmap(currentImage),PageSegMode.AutoOsd);
-           
+
+            Page newPage = tess.Process(new Bitmap(currentImage), PageSegMode.AutoOsd);
+
             ResultIterator iterator = newPage.GetIterator();
             string totalText = newPage.GetText();
             currentRects = new Rect[totalText.Length];
