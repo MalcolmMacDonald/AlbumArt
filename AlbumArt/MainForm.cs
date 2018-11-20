@@ -9,20 +9,19 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Tesseract;
-
 namespace AlbumArt
 {
     public partial class MainForm : Form
     {
-        ArtRetrieval artRetiever;
+        public ArtRetrieval artRetiever;
         public SpotifyConnection spotifyConnection;
         AlbumList currentAlbumList;
-        string currentSaveFolder;
+        public string currentSaveFolder;
         Image currentImage;
         string[] imageFiles;
 
         Rect[] currentRects;
-
+        
         public MainForm()
         {
 
@@ -133,19 +132,7 @@ namespace AlbumArt
                 PrintString("Folder not set.");
                 return;
             }
-
-            artRetiever.GetAlbumArt(currentSaveFolder);
-            imageFiles = Directory.GetFiles(currentSaveFolder);
-
-
-            retrieveButton.Hide();
-            imageSelector.Visible = true;
-            imageSelector.Maximum = imageFiles.Length - 1;
-
-            currentImage = Image.FromFile(imageFiles[0]);
-            pictureBox1.Image = currentImage;
-
-            DetectText();
+            LoadImages();
         }
 
         private void pictureBox1_Click_1(object sender, EventArgs e)
@@ -160,6 +147,21 @@ namespace AlbumArt
         public void ShowRetrieveButton()
         {
             retrieveButton.Visible = true;
+        }
+
+        void LoadImages()
+        {
+            imageFiles = Directory.GetFiles(currentSaveFolder);
+
+
+            retrieveButton.Hide();
+            imageSelector.Visible = true;
+            imageSelector.Maximum = imageFiles.Length - 1;
+
+            currentImage = Image.FromFile(imageFiles[0]);
+            pictureBox1.Image = currentImage;
+
+            DetectText();
         }
 
 

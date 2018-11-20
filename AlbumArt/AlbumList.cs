@@ -15,10 +15,9 @@ namespace AlbumArt
     class AlbumList
     {
         MainForm currentForm;
-        Dictionary<int, List<FullAlbum>> albumsByYear;
-        Dictionary<FullArtist, List<FullAlbum>> albumsByArtist;
-        List<string> names;
-        ArtistData[] savedArtistData;
+        Dictionary<int, List<SimpleAlbum>> albumsByYear;
+        Dictionary<FullArtist, List<SimpleAlbum>> albumsByArtist;
+        List<FullArtist> foundArtists;
 
 
         string albumDataJsonPath;
@@ -26,7 +25,7 @@ namespace AlbumArt
         public AlbumList(MainForm newForm)
         {
             currentForm = newForm;
-            string thisFolder= System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string thisFolder = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             thisFolder = thisFolder.Substring(0, thisFolder.LastIndexOf("AlbumArt"));
             albumDataJsonPath = thisFolder + "SavedAlbumData.json";
             string grammyDataPath = thisFolder + "grammyData.json";
@@ -35,21 +34,10 @@ namespace AlbumArt
 
             string currentJson = File.ReadAllText(grammyDataPath);
 
-            if (File.Exists(albumDataJsonPath))
-            {
-                savedArtistData = JsonConvert.DeserializeObject<ArtistData[]>(File.ReadAllText(albumDataJsonPath));
-            }
-            else
-            {
-                List<string> artistNames = GetArtistsFromJson(currentJson);
-                Task getArtistsTask = GetArtists(artistNames);
-            }
-
-
-
-
-
-            
+            foundArtists = new List<FullArtist>();
+            List<string> artistNames = GetArtistsFromJson(currentJson);
+            Task getArtistsTask = GetArtists(artistNames);
+            getArtistsTask.ContinueWith(task => GetAllAlbums());
 
         }
 
@@ -58,7 +46,7 @@ namespace AlbumArt
             GrammyObject[] allObjects = JsonConvert.DeserializeObject<GrammyObject[]>(json);
             allObjects = allObjects.Where(s => s.awardType != "Individual").ToArray();
             List<string> artistNames = new List<string>();
-            for (int i = 0; i < allObjects.Length; i++)
+            for (int i = 0; i < Math.Min(10,allObjects.Length); i++)
             {
                 if (!artistNames.Contains(allObjects[i].name))
                 {
@@ -70,47 +58,36 @@ namespace AlbumArt
 
         public async Task GetArtists(List<string> artistNames)
         {
-            albumsByArtist = new Dictionary<FullArtist, List<FullAlbum>>();
-            names = new List<string>();
+            albumsByArtist = new Dictionary<FullArtist, List<SimpleAlbum>>();
             for (int i = 0; i < artistNames.Count; i++)
             {
                 FullArtist artistFromName = await currentForm.spotifyConnection.GetArtistFromName(artistNames[i]);
                 if (artistFromName != null)
                 {
-                    albumsByArtist.Add(artistFromName, new List<FullAlbum>());
-                    names.Add(artistFromName.Name);
+                    albumsByArtist.Add(artistFromName, new List<SimpleAlbum>());
+                    foundArtists.Add(artistFromName);
                     Console.WriteLine(artistFromName.Name);
                 }
             }
             Console.WriteLine("DONE");
-            WriteToJson();
+
+
+ 
 
         }
+        
+    
 
-        void WriteToJson()
+        async Task GetAllAlbums()
         {
-            if (File.Exists(albumDataJsonPath))
+            for (int i = 0; i < foundArtists.Count(); i++)
             {
-                File.Delete(albumDataJsonPath);
+               List<SimpleAlbum> foundAlbums = await currentForm.spotifyConnection.GetAlbumsFromArtist(foundArtists[i]);
+
+                albumsByArtist[foundArtists[i]] = foundAlbums;
+                currentForm.artRetiever.GetAlbumArt(currentForm.currentSaveFolder, albumsByArtist[foundArtists[i]]);
             }
-
-            ArtistData[] allArtists = new ArtistData[names.Count];
-            for (int i = 0; i < allArtists.Length; i++)
-            {
-                allArtists[i] = new ArtistData(names[i], null);
-            }
-
-            StreamWriter writer = File.CreateText(albumDataJsonPath);
-            string JsonData = JsonConvert.SerializeObject(allArtists);
-            writer.Write(JsonData);
-            writer.Close();
         }
-
-        void ReadFromJson()
-        {
-
-        }
-
     }
     struct GrammyObject
     {

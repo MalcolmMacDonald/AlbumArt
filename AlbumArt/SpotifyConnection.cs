@@ -8,18 +8,37 @@ using SpotifyAPI.Web.Auth;
 using SpotifyAPI.Web.Enums;
 using SpotifyAPI.Web.Models;
 using System.Net;
+using Newtonsoft.Json;
+using System.IO;
 namespace AlbumArt
 {
     public class SpotifyConnection
     {
-        string _clientId = "ff4babd3faad4128abc7910b5525c06d";
-        string _secretId = "089de4c878314c6aae67ea2d1a451d4b";
+
 
         SpotifyAPI.Web.SpotifyWebAPI _spotify;
         MainForm currentForm;
+        ConnectionData data;
         public SpotifyConnection(MainForm newForm)
         {
             currentForm = newForm;
+
+            string thisFolder = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            thisFolder = thisFolder.Substring(0, thisFolder.LastIndexOf("AlbumArt"));
+
+            string jsonPath = thisFolder + "\\SpotifyAuthData.json";
+            if (File.Exists(jsonPath))
+            {
+                data = JsonConvert.DeserializeObject<ConnectionData>(File.ReadAllText(jsonPath));
+            }
+            else
+            {
+                StreamWriter writer = File.CreateText(jsonPath);
+                writer.Write(JsonConvert.SerializeObject(data));
+                writer.Close();
+            }
+
+
             _spotify = new SpotifyWebAPI()
             {
                 UseAuth = false,
@@ -32,7 +51,7 @@ namespace AlbumArt
             WebAPIFactory webApiFactory = new WebAPIFactory(
                 "http://localhost",
                 8000,
-                _clientId,
+                data._clientId,
                 Scope.UserReadPrivate,
                 TimeSpan.FromSeconds(20)
                 );
@@ -63,18 +82,29 @@ namespace AlbumArt
         }
         public Paging<SavedAlbum> GetSavedAlbums()
         {
-          return _spotify.GetSavedAlbums();
+            return _spotify.GetSavedAlbums();
         }
         public async Task<FullArtist> GetArtistFromName(string artistName)
         {
             SearchItem foundArtists = await _spotify.SearchItemsAsync(artistName, SearchType.Artist);
-            
+
             if (foundArtists != null && foundArtists.Artists.Items.Count > 0)
             {
                 return foundArtists.Artists.Items[0];
             }
 
             return null;
+        }
+        public async Task<List<SimpleAlbum>> GetAlbumsFromArtist(FullArtist artist)
+        {
+            Paging<SimpleAlbum> albumCollection = await _spotify.GetArtistsAlbumsAsync(artist.Id, AlbumType.Album, 50, 50);
+            return albumCollection.Items;
+
+        }
+        struct ConnectionData
+        {
+            public string _clientId;
+            public string _secretId;
         }
     }
 }

@@ -12,7 +12,7 @@ using System.IO;
 
 namespace AlbumArt
 {
-    class ArtRetrieval
+    public class ArtRetrieval
     {
 
         MainForm currentForm;
@@ -23,23 +23,33 @@ namespace AlbumArt
             currentForm = form;
 
 
-            
-
-
         }
 
-        public void GetAlbumArt(string folder)
+        public void GetAlbumArt(string folder, List<SimpleAlbum> artistAlbums = null)
         {
-            Paging<SavedAlbum> albums = currentForm.spotifyConnection.GetSavedAlbums();
+
+            //Paging<SavedAlbum> albums = currentForm.spotifyConnection.GetSavedAlbums();
             WebClient webclient = new WebClient();
             string imageFolderPath = Properties.Settings.Default.FolderPath +  "\\";
 
-            for (int i = 0; i < Math.Min(albums.Limit,albums.Total); i++)
+            for (int i = 0; i < artistAlbums.Count(); i++)
             {
-                string albumName = albums.Items[i].Album.Name;
-                
-                webclient.DownloadFile(albums.Items[i].Album.Images[1].Url, imageFolderPath + albumName + ".bmp");
-
+                string albumName = artistAlbums[i].Name;
+                string albumYear = artistAlbums[i].ReleaseDate;
+                albumYear = albumYear.Substring(0, albumYear.IndexOf('-'));
+                if (albumName != "" && artistAlbums[i].Images.Count() > 1)
+                {
+                    Console.WriteLine(albumName);
+                    try
+                    {
+                        webclient.DownloadFile(artistAlbums[i].Images[1].Url, imageFolderPath + albumYear + " " + albumName + ".bmp");
+                    }
+                    catch (Exception ex)
+                    {
+                      //  Console.WriteLine("Could not download image: " + albumName + " " + ex);
+                    }
+                    
+                }
             }
 
             webclient.Dispose();
