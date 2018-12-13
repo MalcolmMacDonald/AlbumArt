@@ -18,46 +18,69 @@ namespace AlbumArt
         Dictionary<int, List<SimpleAlbum>> albumsByYear;
         Dictionary<FullArtist, List<SimpleAlbum>> albumsByArtist;
         List<FullArtist> foundArtists;
+        List<string> artistNames;
 
+        string thisFolder;
 
         string albumDataJsonPath;
+        string grammyDataPath;
 
+        string currentArtistNamesJson;
+
+
+        int totalArtistCount = int.MaxValue;
         public AlbumList(MainForm newForm)
         {
             currentForm = newForm;
-            string thisFolder = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            thisFolder = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             thisFolder = thisFolder.Substring(0, thisFolder.LastIndexOf("AlbumArt"));
+
             albumDataJsonPath = thisFolder + "SavedAlbumData.json";
-            string grammyDataPath = thisFolder + "grammyData.json";
+            grammyDataPath = thisFolder + "GrammyData.json";
 
             Console.WriteLine(thisFolder);
 
-            string currentJson = File.ReadAllText(grammyDataPath);
+            currentArtistNamesJson = File.ReadAllText(grammyDataPath);
 
-            foundArtists = new List<FullArtist>();
-            List<string> artistNames = GetArtistsFromJson(currentJson);
-            Task getArtistsTask = GetArtists(artistNames);
-            getArtistsTask.ContinueWith(task => GetAllAlbums());
+
+            artistNames = GetArtistsFromJson();
+
 
         }
-
-        List<string> GetArtistsFromJson(string json)
+        List<string> GetArtistsFromJson()
         {
-            GrammyObject[] allObjects = JsonConvert.DeserializeObject<GrammyObject[]>(json);
+            GrammyObject[] allObjects = JsonConvert.DeserializeObject<GrammyObject[]>(currentArtistNamesJson);
             allObjects = allObjects.Where(s => s.awardType != "Individual").ToArray();
             List<string> artistNames = new List<string>();
-            for (int i = 0; i < Math.Min(10,allObjects.Length); i++)
+            int currentArtistCount = 0;
+            int i = 0;
+            while (currentArtistCount < totalArtistCount && i < allObjects.Length)
             {
                 if (!artistNames.Contains(allObjects[i].name))
                 {
+
                     artistNames.Add(allObjects[i].name);
+                    currentArtistCount++;
                 }
+                i++;
+
             }
             return artistNames;
         }
 
-        public async Task GetArtists(List<string> artistNames)
+        public void LoadAlbums( )
         {
+            Task.Run(() => GetArtists());
+
+           // getArtistsTask = getArtistsTask.ContinueWith(task => GetAlbumsFromArtists());
+        }
+
+
+
+        public async Task GetArtists( )
+        {
+            foundArtists = new List<FullArtist>();
             albumsByArtist = new Dictionary<FullArtist, List<SimpleAlbum>>();
             for (int i = 0; i < artistNames.Count; i++)
             {
@@ -66,27 +89,43 @@ namespace AlbumArt
                 {
                     albumsByArtist.Add(artistFromName, new List<SimpleAlbum>());
                     foundArtists.Add(artistFromName);
-                    Console.WriteLine(artistFromName.Name);
+                    Console.WriteLine("Found artist {0} from name {1}",artistFromName.Name,artistNames[i]);
+                }
+                else
+                {
+                    Console.WriteLine("Could not find artist {0} on spotify",artistNames[i]);
                 }
             }
-            Console.WriteLine("DONE");
 
+            Console.WriteLine("Done finding artists on spotify");
 
- 
+            for (int i = 0; i < artistNames.Count; i++)
+            {
+                
+                Console.WriteLine("Finding text from artist {0}", foundArtists[i].Name);
+                await GetAlbumsFromArtist(i);
+               
+            }
 
         }
-        
-    
 
-        async Task GetAllAlbums()
+
+
+        async Task GetAlbumsFromArtist(int artistIndex)
         {
-            for (int i = 0; i < foundArtists.Count(); i++)
-            {
-               List<SimpleAlbum> foundAlbums = await currentForm.spotifyConnection.GetAlbumsFromArtist(foundArtists[i]);
 
-                albumsByArtist[foundArtists[i]] = foundAlbums;
-                currentForm.artRetiever.GetAlbumArt(currentForm.currentSaveFolder, albumsByArtist[foundArtists[i]]);
-            }
+                List<SimpleAlbum> foundAlbums = await currentForm.spotifyConnection.GetAlbumsFromArtist(foundArtists[artistIndex]);
+
+                albumsByArtist[foundArtists[artistIndex]] = foundAlbums;
+
+                currentForm.artRetiever.GetAlbumArt(albumsByArtist[foundArtists[artistIndex]]);
+                currentForm.artRetiever.GetHeatMapsFromCurrentFiles();
+            
+            
+        }
+        void CompleteGettingAlbumsForArtist()
+        {
+            Console.WriteLine("Done getting heatmaps from artist" + foundArtists[0]);
         }
     }
     struct GrammyObject

@@ -19,6 +19,7 @@ namespace AlbumArt
         SpotifyAPI.Web.SpotifyWebAPI _spotify;
         MainForm currentForm;
         ConnectionData data;
+
         public SpotifyConnection(MainForm newForm)
         {
             currentForm = newForm;
@@ -27,6 +28,7 @@ namespace AlbumArt
             thisFolder = thisFolder.Substring(0, thisFolder.LastIndexOf("AlbumArt"));
 
             string jsonPath = thisFolder + "\\SpotifyAuthData.json";
+
             if (File.Exists(jsonPath))
             {
                 data = JsonConvert.DeserializeObject<ConnectionData>(File.ReadAllText(jsonPath));
@@ -73,8 +75,7 @@ namespace AlbumArt
             else
             {
                 currentForm.HideSpotifyButton();
-                currentForm.ShowRetrieveButton();
-                currentForm.PrintString("Connected.");
+                currentForm.PrintString("Connected to Spotify.");
             }
 
 
@@ -97,10 +98,61 @@ namespace AlbumArt
         }
         public async Task<List<SimpleAlbum>> GetAlbumsFromArtist(FullArtist artist)
         {
-            Paging<SimpleAlbum> albumCollection = await _spotify.GetArtistsAlbumsAsync(artist.Id, AlbumType.Album, 50, 50);
-            return albumCollection.Items;
+
+            Paging<SimpleAlbum> tempAlbumCollection = null;
+            List<SimpleAlbum> totalAlbumsCollection = new List<SimpleAlbum>();
+            int startIndex = 0;
+            do
+            {
+                tempAlbumCollection = await _spotify.GetArtistsAlbumsAsync(artist.Id, AlbumType.Album, 50, startIndex,"CA");
+
+                totalAlbumsCollection.AddRange(RemoveDuplicates(tempAlbumCollection.Items,totalAlbumsCollection));
+                startIndex += 50;
+            }
+            while (tempAlbumCollection.Items.Count == 50);
+             
+            return totalAlbumsCollection;
 
         }
+
+        List<SimpleAlbum> RemoveDuplicates(List<SimpleAlbum> input,List<SimpleAlbum> totalList)
+        {
+            List<SimpleAlbum> output = new List<SimpleAlbum>();
+            foreach(SimpleAlbum item in input)
+            {
+
+                if (totalList.Count > 0)
+                {
+                    bool isInTotal = IsSameAlbum(totalList[totalList.Count - 1], item);
+                    if (isInTotal)
+                    {
+                        continue;
+                    }
+                }
+
+                bool isInOutput = output.Any(s => IsSameAlbum(s, item));
+                if (isInOutput)
+                {
+                    continue;
+                }
+
+
+                output.Add(item);
+
+            }
+            return output;
+        }
+        bool IsSameAlbum(SimpleAlbum lhs, SimpleAlbum rhs)
+        {
+            bool nameIsSame = lhs.Name == rhs.Name;
+            if (nameIsSame)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         struct ConnectionData
         {
             public string _clientId;
