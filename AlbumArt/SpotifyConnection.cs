@@ -65,7 +65,7 @@ namespace AlbumArt
             }
             catch (Exception ex)
             {
-                currentForm.PrintString(ex.Message);
+                Console.WriteLine(ex.Message);
             }
 
             if (_spotify == null)
@@ -75,7 +75,7 @@ namespace AlbumArt
             else
             {
                 currentForm.HideSpotifyButton();
-                currentForm.PrintString("Connected to Spotify.");
+                Console.WriteLine("Connected to Spotify.");
             }
 
 

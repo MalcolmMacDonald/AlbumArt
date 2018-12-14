@@ -106,7 +106,7 @@ namespace AlbumArt
                 await GetAlbumsFromArtist(i);
                
             }
-
+            Console.WriteLine("FOUND ALL HEATMAPS");
         }
 
 

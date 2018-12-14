@@ -20,7 +20,6 @@ namespace AlbumArt
         Dictionary<int, Bitmap> heatMaps;
         List<int> years;
         TextDetection textDetector;
-        string currentArtist;
         string currentImageFolder
         {
             get
@@ -162,7 +161,17 @@ namespace AlbumArt
         int currentYear = 0;
         public Bitmap GetHeatMap()
         {
-            return heatMaps[years[currentYear++]];
+            int nextYear = currentYear + 1;
+
+            if (nextYear >= years.Count)
+            {
+                nextYear = currentYear;
+            }
+
+            Console.WriteLine("Reading heatmap for year {0}", years[nextYear]);
+            Bitmap imageToReturn = heatMaps[years[currentYear]];
+            currentYear = nextYear;
+            return imageToReturn;
 
         }
 
