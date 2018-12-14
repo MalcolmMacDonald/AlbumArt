@@ -6,8 +6,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+
 namespace AlbumArt
 {
     public delegate void ThreadCallback();
@@ -18,7 +20,9 @@ namespace AlbumArt
         public SpotifyConnection spotifyConnection;
         AlbumList currentAlbumList;
         public string currentSaveFolder;
-        string[] imageFiles;
+        public string testString;
+
+        Thread uiThread;
 
         public MainForm()
         {
@@ -52,6 +56,16 @@ namespace AlbumArt
 
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (uiThread != null && uiThread.IsAlive)
+            {
+                uiThread.Join();
+            }
+
+
+            base.OnFormClosing(e);
+        }
 
         private void folderSelectButton_Click(object sender, EventArgs e)
         {
@@ -87,7 +101,24 @@ namespace AlbumArt
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            RunUIThread();
             currentAlbumList.LoadAlbums();
+        }
+
+        void RunUIThread()
+        {
+            uiThread = new Thread(() =>
+            {
+                while(true)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        readoutLabel.Text = testString;
+                    });
+                    Thread.Sleep(100);
+                }
+            });
+            uiThread.Start();
         }
     }
 }

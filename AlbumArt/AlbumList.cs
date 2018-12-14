@@ -89,8 +89,8 @@ namespace AlbumArt
                 {
                     albumsByArtist.Add(artistFromName, new List<SimpleAlbum>());
                     foundArtists.Add(artistFromName);
-                    Console.WriteLine("Found artist {0} from name {1}",artistFromName.Name,artistNames[i]);
-                }
+                    currentForm.testString =string.Format("Found artist {0} from name {1}",artistFromName.Name,artistNames[i]);
+        }
                 else
                 {
                     Console.WriteLine("Could not find artist {0} on spotify",artistNames[i]);
