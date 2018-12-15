@@ -20,9 +20,30 @@ namespace AlbumArt
         public SpotifyConnection spotifyConnection;
         AlbumList currentAlbumList;
         public string currentSaveFolder;
-        public string testString;
+        public string currentReadout;
 
-        Thread uiThread;
+        Thread readoutThread;
+        Thread heatmapDisplayThread;
+        int currentYearIndex = 0;
+        int currentYear
+        {
+            get
+            {
+                if(artRetiever == null)
+                {
+                    return 1999;
+                }
+                if(artRetiever.years == null)
+                {
+                    return 1999;
+                }
+                if(artRetiever.years.Count <= currentYearIndex)
+                {
+                    return 1999;
+                }
+                return artRetiever.years[currentYearIndex];
+            }
+        }
 
         public MainForm()
         {
@@ -56,16 +77,7 @@ namespace AlbumArt
 
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e)
-        {
-            if (uiThread != null && uiThread.IsAlive)
-            {
-                uiThread.Join();
-            }
 
-
-            base.OnFormClosing(e);
-        }
 
         private void folderSelectButton_Click(object sender, EventArgs e)
         {
@@ -95,30 +107,95 @@ namespace AlbumArt
         private void previousYearButton_Click(object sender, EventArgs e)
         {
 
+            currentYearIndex--;
+            if(currentYearIndex < 0)
+            {
+                currentYearIndex = 0;
+            }
+
+
+            currentYearLabel.Text = currentYear.ToString();
+        }
+
+        private void nextYearButton_Click(object sender, EventArgs e)
+        {
+
+            currentYearIndex++;
+            if (artRetiever.years != null)
+            {
+                if (currentYearIndex >= artRetiever.years.Count)
+                {
+                    currentYearIndex--;
+                }
+            }
+            else
+            {
+                return;
+            }
+            currentYearLabel.Text = currentYear.ToString();
+
         }
 
 
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            RunUIThread();
+            RunReadoutThread();
+            RunHeatmapDiplayThread();
             currentAlbumList.LoadAlbums();
         }
 
-        void RunUIThread()
+        void RunReadoutThread()
         {
-            uiThread = new Thread(() =>
+            readoutThread = new Thread(() =>
             {
-                while(true)
+                while (true)
                 {
                     this.Invoke((MethodInvoker)delegate
                     {
-                        readoutLabel.Text = testString;
+                        readoutLabel.Text = currentReadout;
                     });
                     Thread.Sleep(100);
                 }
             });
-            uiThread.Start();
+            readoutThread.Start();
         }
+
+        public void DisplayString(string input)
+        {
+            currentReadout = input;
+        }
+        void RunHeatmapDiplayThread()
+        {
+            heatmapDisplayThread = new Thread(() =>
+            {
+                while (true)
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        heatMapDisplay.Image = artRetiever.GetHeatMap(currentYear);
+                    });
+                    Thread.Sleep(100);
+                }
+            });
+            heatmapDisplayThread.Start();
+        }
+
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (readoutThread != null && readoutThread.IsAlive)
+            {
+                readoutThread.Abort();
+            }
+            if (heatmapDisplayThread != null && heatmapDisplayThread.IsAlive)
+            {
+                heatmapDisplayThread.Abort();
+            }
+
+            base.OnFormClosing(e);
+        }
+
     }
+
 }

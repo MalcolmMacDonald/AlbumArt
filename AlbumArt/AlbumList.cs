@@ -89,24 +89,23 @@ namespace AlbumArt
                 {
                     albumsByArtist.Add(artistFromName, new List<SimpleAlbum>());
                     foundArtists.Add(artistFromName);
-                    currentForm.testString =string.Format("Found artist {0} from name {1}",artistFromName.Name,artistNames[i]);
+                    currentForm.DisplayString(string.Format("Found artist {0} from name {1}", artistFromName.Name, artistNames[i]));
         }
                 else
                 {
-                    Console.WriteLine("Could not find artist {0} on spotify",artistNames[i]);
+                    currentForm.DisplayString(string.Format("Could not find artist {0} on spotify",artistNames[i]));
                 }
             }
 
-            Console.WriteLine("Done finding artists on spotify");
+            currentForm.DisplayString("Done finding artists on spotify");
 
             for (int i = 0; i < artistNames.Count; i++)
             {
-                
-                Console.WriteLine("Finding text from artist {0}", foundArtists[i].Name);
+
+                currentForm.DisplayString(string.Format("Finding text from artist {0}", foundArtists[i].Name));
                 await GetAlbumsFromArtist(i);
                
             }
-            Console.WriteLine("FOUND ALL HEATMAPS");
         }
 
 

@@ -18,7 +18,7 @@ namespace AlbumArt
 
         const int imageSize = 300;
         Dictionary<int, Bitmap> heatMaps;
-        List<int> years;
+        public List<int> years;
         TextDetection textDetector;
         string currentImageFolder
         {
@@ -43,7 +43,7 @@ namespace AlbumArt
             WebClient webclient = new WebClient();
 
             EmptyFolder(currentImageFolder);
-            Console.WriteLine("Dowloading Images");
+            currentForm.DisplayString("Downloading Images");
 
             for (int i = 0; i < artistAlbums.Count; i++)
             {
@@ -62,7 +62,7 @@ namespace AlbumArt
 
                     if (!years.Contains(int.Parse(albumYear)))
                     {
-                        years.Add(int.Parse(albumYear));
+                        years.Insert(0,int.Parse(albumYear));
                     }
                     
                     if(File.Exists(yearFolder + "\\" + albumName + ".bmp"))
@@ -125,7 +125,7 @@ namespace AlbumArt
             foreach(DirectoryInfo yearFolder in yearFolders)
             {
                 int thisYear = int.Parse(yearFolder.Name);
-                Console.WriteLine("Finding text in year {0}",thisYear);
+                currentForm.DisplayString(string.Format("Finding text in year {0}",thisYear));
 
 
                 heatMaps.Add(thisYear, new Bitmap(imageSize,imageSize));
@@ -158,19 +158,18 @@ namespace AlbumArt
                 file.Delete();
             }
         }
-        int currentYear = 0;
-        public Bitmap GetHeatMap()
+        public Bitmap GetHeatMap(int year)
         {
-            int nextYear = currentYear + 1;
-
-            if (nextYear >= years.Count)
+            if (!heatMaps.ContainsKey(year))
             {
-                nextYear = currentYear;
+                return null;
+            }
+            if (!years.Contains(year))
+            {
+                return null;
             }
 
-            Console.WriteLine("Reading heatmap for year {0}", years[nextYear]);
-            Bitmap imageToReturn = heatMaps[years[currentYear]];
-            currentYear = nextYear;
+            Bitmap imageToReturn = heatMaps[year];
             return imageToReturn;
 
         }

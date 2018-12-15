@@ -91,10 +91,10 @@
             this.readoutLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.readoutLabel.Location = new System.Drawing.Point(5, 533);
             this.readoutLabel.Margin = new System.Windows.Forms.Padding(5);
-            this.readoutLabel.MaximumSize = new System.Drawing.Size(0, 200);
+            this.readoutLabel.MaximumSize = new System.Drawing.Size(700, 200);
             this.readoutLabel.MinimumSize = new System.Drawing.Size(1, 1);
             this.readoutLabel.Name = "readoutLabel";
-            this.readoutLabel.Size = new System.Drawing.Size(3487, 105);
+            this.readoutLabel.Size = new System.Drawing.Size(700, 132);
             this.readoutLabel.TabIndex = 4;
             this.readoutLabel.Text = resources.GetString("readoutLabel.Text");
             // 
@@ -111,7 +111,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(3491, 522);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(964, 522);
             this.tableLayoutPanel1.TabIndex = 6;
             // 
             // verticalHeatMapLayout
@@ -128,17 +128,18 @@
             verticalHeatMapLayout.RowCount = 2;
             verticalHeatMapLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
             verticalHeatMapLayout.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            verticalHeatMapLayout.Size = new System.Drawing.Size(3290, 516);
+            verticalHeatMapLayout.Size = new System.Drawing.Size(763, 516);
             verticalHeatMapLayout.TabIndex = 3;
             // 
             // heatMapDisplay
             // 
-            this.heatMapDisplay.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.heatMapDisplay.BackColor = System.Drawing.SystemColors.Control;
             this.heatMapDisplay.Enabled = false;
             this.heatMapDisplay.Location = new System.Drawing.Point(5, 5);
             this.heatMapDisplay.Margin = new System.Windows.Forms.Padding(5);
             this.heatMapDisplay.Name = "heatMapDisplay";
             this.heatMapDisplay.Size = new System.Drawing.Size(500, 462);
+            this.heatMapDisplay.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.heatMapDisplay.TabIndex = 2;
             this.heatMapDisplay.TabStop = false;
             // 
@@ -158,7 +159,7 @@
             horizontalHeatMapButtonsLayout.Name = "horizontalHeatMapButtonsLayout";
             horizontalHeatMapButtonsLayout.RowCount = 1;
             horizontalHeatMapButtonsLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            horizontalHeatMapButtonsLayout.Size = new System.Drawing.Size(3284, 38);
+            horizontalHeatMapButtonsLayout.Size = new System.Drawing.Size(757, 38);
             horizontalHeatMapButtonsLayout.TabIndex = 3;
             // 
             // previousYearButton
@@ -169,7 +170,7 @@
             this.previousYearButton.Dock = System.Windows.Forms.DockStyle.Fill;
             this.previousYearButton.Location = new System.Drawing.Point(3, 3);
             this.previousYearButton.Name = "previousYearButton";
-            this.previousYearButton.Size = new System.Drawing.Size(1603, 32);
+            this.previousYearButton.Size = new System.Drawing.Size(339, 32);
             this.previousYearButton.TabIndex = 0;
             this.previousYearButton.Text = "Previous Year";
             this.previousYearButton.UseVisualStyleBackColor = true;
@@ -180,12 +181,13 @@
             this.nextYearButton.AutoSize = true;
             this.nextYearButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.nextYearButton.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.nextYearButton.Location = new System.Drawing.Point(1678, 3);
+            this.nextYearButton.Location = new System.Drawing.Point(414, 3);
             this.nextYearButton.Name = "nextYearButton";
-            this.nextYearButton.Size = new System.Drawing.Size(1603, 32);
+            this.nextYearButton.Size = new System.Drawing.Size(340, 32);
             this.nextYearButton.TabIndex = 1;
             this.nextYearButton.Text = "Next Year";
             this.nextYearButton.UseVisualStyleBackColor = true;
+            this.nextYearButton.Click += new System.EventHandler(this.nextYearButton_Click);
             // 
             // currentYearLabel
             // 
@@ -193,7 +195,7 @@
             this.currentYearLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.currentYearLabel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.currentYearLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.currentYearLabel.Location = new System.Drawing.Point(1612, 0);
+            this.currentYearLabel.Location = new System.Drawing.Point(348, 0);
             this.currentYearLabel.Name = "currentYearLabel";
             this.currentYearLabel.Size = new System.Drawing.Size(60, 38);
             this.currentYearLabel.TabIndex = 2;
